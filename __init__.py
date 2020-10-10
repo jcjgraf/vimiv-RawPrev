@@ -3,11 +3,9 @@
 import subprocess
 from typing import Any, BinaryIO
 
-from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QPixmap
 
 from vimiv import api
-from vimiv.api import signals
 from vimiv.utils import log, files
 
 _logger = log.module_logger(__name__)
@@ -18,28 +16,19 @@ def test_cr2(header: bytes, _f: BinaryIO) -> bool:
 
 
 def load_cr2(path):
+    """Extract the thumbnail from the image and initialize QPixmap"""
     output = subprocess.run(["dcraw", "-e", "-c", path], capture_output=True, check=True)
     pixmap = QPixmap()
     pixmap.loadFromData(output.stdout)
 
     return pixmap
 
-class RawPrev(QObject):
-
-    @api.objreg.register
-    def __init__(self, info: str) -> None:
-        super().__init__()
-
-        files.add_image_format("cr2", test_cr2)
-        api.external_handler["cr2"] = load_cr2
-        api.external_handler["CR2"] = load_cr2
-
-        _logger.debug("Initialized RawPrev")
 
 def init(info: str, *_args: Any, **_kwargs: Any) -> None:
-    """Setup RawPrev plugin by initializing the RawPrev class."""
-    RawPrev(info)
+    """Setup RawPrev plugin by adding the raw handler"""
 
+    files.add_image_format("cr2", test_cr2)
+    api.external_handler["cr2"] = load_cr2
+    api.external_handler["CR2"] = load_cr2
 
-def cleanup(*_args: Any, **_kwargs: Any) -> None:
-    _logger.debug("Cleaning up RawPrev plugin")
+    _logger.debug("Initialized RawPrev")

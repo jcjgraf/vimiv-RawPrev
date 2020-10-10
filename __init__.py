@@ -31,7 +31,8 @@ class RawPrev(QObject):
         super().__init__()
 
         files.add_image_format("cr2", test_cr2)
-        api.external_handler.append((["cr2", "CR2"], load_cr2))
+        api.external_handler["cr2"] = load_cr2
+        api.external_handler["CR2"] = load_cr2
 
         _logger.debug("Initialized RawPrev")
 

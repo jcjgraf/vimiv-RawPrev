@@ -1,6 +1,8 @@
 ## Vimiv RawPrev
 > [vimiv-qt](https://raw.github.com/karlch/vimiv-qt) plugin for RAW images support
 
+**This plugin does not yet work with the current version of vimiv, we are working on a suitable integration**
+
 Vimiv RawPrev enables support for RAW images by extracting the jpeg thumbnail embedded in RAW images.
 
 ### Installation

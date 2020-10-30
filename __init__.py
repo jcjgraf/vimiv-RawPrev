@@ -17,7 +17,9 @@ def test_cr2(header: bytes, _f: BinaryIO) -> bool:
 
 def load_cr2(path):
     """Extract the thumbnail from the image and initialize QPixmap"""
-    output = subprocess.run(["dcraw", "-e", "-c", path], capture_output=True, check=True)
+    output = subprocess.run(
+        ["dcraw", "-e", "-c", path], capture_output=True, check=True
+    )
     pixmap = QPixmap()
     pixmap.loadFromData(output.stdout)
 
@@ -26,9 +28,6 @@ def load_cr2(path):
 
 def init(info: str, *_args: Any, **_kwargs: Any) -> None:
     """Setup RawPrev plugin by adding the raw handler"""
-
-    files.add_image_format("cr2", test_cr2)
-    api.external_handler["cr2"] = load_cr2
-    api.external_handler["CR2"] = load_cr2
+    api.add_external_format("cr2", test_cr2, load_cr2)
 
     _logger.debug("Initialized RawPrev")

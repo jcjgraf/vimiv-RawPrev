@@ -22,6 +22,10 @@ def load_cr2(path) -> QPixmap:
     process.start(f"dcraw -e -c {path}")
     process.waitForFinished()
 
+    if process.exitStatus() != QProcess.NormalExit or process.exitCode() != 0:
+        stderr = process.readAllStandardError()
+        raise ValueError(f"Error calling dcraw: '{stderr.data().decode()}'")
+
     handler = QImageReader(process, "jpeg".encode())
     handler.setAutoTransform(True)
 

@@ -39,8 +39,37 @@ def load_cr2(path) -> QPixmap:
     return pixmap
 
 
+def test_cr3(header: bytes, _f: BinaryIO) -> bool:
+    return header[4:8] == b"ftyp" and header[8:11] == b"crx" and header[16:24] == b"crx isom" and header[28:32] == b"moov"
+
+
+def load_cr3(path) -> QPixmap:
+    """Extract the thumbnail from the image and initialize QPixmap"""
+
+    process = QProcess()
+    process.start(f"exiftool -b -JpgFromRaw {path}")
+    process.waitForFinished()
+
+    if process.exitStatus() != QProcess.NormalExit or process.exitCode() != 0:
+        stderr = process.readAllStandardError()
+        raise ValueError(f"Error calling dcraw: '{stderr.data().decode()}'")
+
+    handler = QImageReader(process, "jpeg".encode())
+    handler.setAutoTransform(True)
+
+    process.closeWriteChannel()
+    process.terminate()
+
+    # Extract QImage from QImageReader and convert to QPixmap
+    pixmap = QPixmap()
+    pixmap.convertFromImage(handler.read())
+
+    return pixmap
+
+
 def init(info: str, *_args: Any, **_kwargs: Any) -> None:
     """Setup RawPrev plugin by adding the raw handler"""
     api.add_external_format("cr2", test_cr2, load_cr2)
+    api.add_external_format("cr3", test_cr3, load_cr3)
 
     _logger.debug("Initialized RawPrev")

@@ -52,7 +52,7 @@ def load_cr3(path) -> QPixmap:
 
     if process.exitStatus() != QProcess.NormalExit or process.exitCode() != 0:
         stderr = process.readAllStandardError()
-        raise ValueError(f"Error calling dcraw: '{stderr.data().decode()}'")
+        raise ValueError(f"Error calling exiftool: '{stderr.data().decode()}'")
 
     handler = QImageReader(process, "jpeg".encode())
     handler.setAutoTransform(True)

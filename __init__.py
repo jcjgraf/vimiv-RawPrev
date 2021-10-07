@@ -47,12 +47,21 @@ def load_cr3(path) -> QPixmap:
     """Extract the thumbnail from the image and initialize QPixmap"""
 
     process = QProcess()
-    process.start(f"exiftool -b -JpgFromRaw {path}")
+    process.start(f"exiftool -b -JpgFromRaw -w! /tmp/vimiv-RawPrev%d%F.jpg -q -execute -tagsfromfile @ -srcfile /tmp/vimiv-RawPrev{path}.jpg -overwrite_original -common_args {path}")
     process.waitForFinished()
 
     if process.exitStatus() != QProcess.NormalExit or process.exitCode() != 0:
         stderr = process.readAllStandardError()
         raise ValueError(f"Error calling exiftool: '{stderr.data().decode()}'")
+
+    # TODO reuse process
+    process = QProcess()
+    process.start(f"cat /tmp/vimiv-RawPrev/{path}.jpg")
+    process.waitForFinished()
+
+    if process.exitStatus() != QProcess.NormalExit or process.exitCode() != 0:
+        stderr = process.readAllStandardError()
+        raise ValueError(f"Error calling cat: '{stderr.data().decode()}'")
 
     handler = QImageReader(process, "jpeg".encode())
     handler.setAutoTransform(True)

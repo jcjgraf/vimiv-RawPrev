@@ -1,5 +1,6 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 
+from functools import lru_cache
 from typing import Any, BinaryIO
 
 from vimiv import api
@@ -14,6 +15,7 @@ def test_cr2(header: bytes, _f: BinaryIO) -> bool:
     return header[:2] in (b"II", b"MM") and header[8:10] == b"CR"
 
 
+@lru_cache(maxsize=40)
 def load_cr2(path) -> QPixmap:
     """Extract the thumbnail from the image and initialize QPixmap"""
 
@@ -46,6 +48,7 @@ def test_cr3(header: bytes, _f: BinaryIO) -> bool:
     return header[4:8] == b"ftyp" and header[8:11] == b"crx" and header[16:24] == b"crx isom" and header[28:32] == b"moov"
 
 
+@lru_cache(maxsize=40)
 def load_cr3(path) -> QPixmap:
     """Extract the thumbnail from the image and initialize QPixmap"""
 

@@ -2,10 +2,9 @@
 
 from typing import Any, BinaryIO
 
-from PyQt5.QtGui import QPixmap, QImageReader
-from PyQt5.QtCore import QProcess
-
 from vimiv import api
+from vimiv.qt.gui import QPixmap, QImageReader
+from vimiv.qt.core import QProcess
 from vimiv.utils import log
 
 _logger = log.module_logger(__name__)
@@ -19,12 +18,16 @@ def load_cr2(path) -> QPixmap:
     """Extract the thumbnail from the image and initialize QPixmap"""
 
     process = QProcess()
-    process.start(f"dcraw -e -c {path}")
-    process.waitForFinished()
+    process.start("dcraw", ["-e", "-c", path])
 
-    if process.exitStatus() != QProcess.NormalExit or process.exitCode() != 0:
+    if not process.waitForFinished():
+        _logger.error(f"Process exited with code {process.exitCode()}")
+        raise OSError("Error waiting for process")
+
+    if process.exitStatus() != QProcess.ExitStatus.NormalExit or process.exitCode() != 0:
+        _logger.error(f"Process exited with code {process.exitCode()}")
         stderr = process.readAllStandardError()
-        raise ValueError(f"Error calling dcraw: '{stderr.data().decode()}'")
+        raise OSError(f"Error calling dcraw: '{stderr.data().decode()}'")
 
     handler = QImageReader(process, "jpeg".encode())
     handler.setAutoTransform(True)
@@ -47,21 +50,29 @@ def load_cr3(path) -> QPixmap:
     """Extract the thumbnail from the image and initialize QPixmap"""
 
     process = QProcess()
-    process.start(f"exiftool -b -JpgFromRaw -w! /tmp/vimiv-RawPrev%d%F.jpg -q -execute -tagsfromfile @ -srcfile /tmp/vimiv-RawPrev{path}.jpg -overwrite_original -common_args {path}")
-    process.waitForFinished()
+    process.start("exiftool", ["-b", "-JpgFromRaw", "-w!", "/tmp/vimiv-RawPrev%d%F.jpg", "-q", "-execute", "-tagsfromfile", "@", "-srcfile", f"/tmp/vimiv-RawPrev{path}.jpg", "-overwrite_original", "-common_args", path])
 
-    if process.exitStatus() != QProcess.NormalExit or process.exitCode() != 0:
+    if not process.waitForFinished():
+        _logger.error(f"Process exited with code {process.exitCode()}")
+        raise OSError("Error waiting for process")
+
+    if process.exitStatus() != QProcess.ExitStatus.NormalExit or process.exitCode() != 0:
+        _logger.error(f"Process exited with code {process.exitCode()}")
         stderr = process.readAllStandardError()
-        raise ValueError(f"Error calling exiftool: '{stderr.data().decode()}'")
+        raise OSError(f"Error calling exiftool: '{stderr.data().decode()}'")
 
     # TODO reuse process
     process = QProcess()
-    process.start(f"cat /tmp/vimiv-RawPrev/{path}.jpg")
-    process.waitForFinished()
+    process.start("cat", [f"/tmp/vimiv-RawPrev/{path}.jpg"])
 
-    if process.exitStatus() != QProcess.NormalExit or process.exitCode() != 0:
+    if not process.waitForFinished():
+        _logger.error(f"Process exited with code {process.exitCode()}")
+        raise OSError("Error waiting for process")
+
+    if process.exitStatus() != QProcess.ExitStatus.NormalExit or process.exitCode() != 0:
+        _logger.error(f"Process exited with code {process.exitCode()}")
         stderr = process.readAllStandardError()
-        raise ValueError(f"Error calling cat: '{stderr.data().decode()}'")
+        raise OSError(f"Error calling cat: '{stderr.data().decode()}'")
 
     handler = QImageReader(process, "jpeg".encode())
     handler.setAutoTransform(True)

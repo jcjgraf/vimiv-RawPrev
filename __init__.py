@@ -26,7 +26,10 @@ def load_cr2(path) -> QPixmap:
         _logger.error(f"Process exited with code {process.exitCode()}")
         raise OSError("Error waiting for process")
 
-    if process.exitStatus() != QProcess.ExitStatus.NormalExit or process.exitCode() != 0:
+    if (
+        process.exitStatus() != QProcess.ExitStatus.NormalExit
+        or process.exitCode() != 0
+    ):
         _logger.error(f"Process exited with code {process.exitCode()}")
         stderr = process.readAllStandardError()
         raise OSError(f"Error calling dcraw: '{stderr.data().decode()}'")
@@ -45,7 +48,12 @@ def load_cr2(path) -> QPixmap:
 
 
 def test_cr3(header: bytes, _f: BinaryIO) -> bool:
-    return header[4:8] == b"ftyp" and header[8:11] == b"crx" and header[16:24] == b"crx isom" and header[28:32] == b"moov"
+    return (
+        header[4:8] == b"ftyp"
+        and header[8:11] == b"crx"
+        and header[16:24] == b"crx isom"
+        and header[28:32] == b"moov"
+    )
 
 
 @lru_cache(maxsize=40)
@@ -53,13 +61,33 @@ def load_cr3(path) -> QPixmap:
     """Extract the thumbnail from the image and initialize QPixmap"""
 
     process = QProcess()
-    process.start("exiftool", ["-b", "-JpgFromRaw", "-w!", "/tmp/vimiv-RawPrev%d%F.jpg", "-q", "-execute", "-tagsfromfile", "@", "-srcfile", f"/tmp/vimiv-RawPrev{path}.jpg", "-overwrite_original", "-common_args", path])
+    process.start(
+        "exiftool",
+        [
+            "-b",
+            "-JpgFromRaw",
+            "-w!",
+            "/tmp/vimiv-RawPrev%d%F.jpg",
+            "-q",
+            "-execute",
+            "-tagsfromfile",
+            "@",
+            "-srcfile",
+            f"/tmp/vimiv-RawPrev{path}.jpg",
+            "-overwrite_original",
+            "-common_args",
+            path,
+        ],
+    )
 
     if not process.waitForFinished():
         _logger.error(f"Process exited with code {process.exitCode()}")
         raise OSError("Error waiting for process")
 
-    if process.exitStatus() != QProcess.ExitStatus.NormalExit or process.exitCode() != 0:
+    if (
+        process.exitStatus() != QProcess.ExitStatus.NormalExit
+        or process.exitCode() != 0
+    ):
         _logger.error(f"Process exited with code {process.exitCode()}")
         stderr = process.readAllStandardError()
         raise OSError(f"Error calling exiftool: '{stderr.data().decode()}'")
@@ -72,7 +100,10 @@ def load_cr3(path) -> QPixmap:
         _logger.error(f"Process exited with code {process.exitCode()}")
         raise OSError("Error waiting for process")
 
-    if process.exitStatus() != QProcess.ExitStatus.NormalExit or process.exitCode() != 0:
+    if (
+        process.exitStatus() != QProcess.ExitStatus.NormalExit
+        or process.exitCode() != 0
+    ):
         _logger.error(f"Process exited with code {process.exitCode()}")
         stderr = process.readAllStandardError()
         raise OSError(f"Error calling cat: '{stderr.data().decode()}'")

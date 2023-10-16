@@ -6,10 +6,11 @@ vimiv RawPrev enables support for RAW images by extracting the embedded thumbnai
 ### Supported Formats
 The following RAW formats are currently supported:
 
-| **Format**  | **Extension** | **Dependency**                           |
-| :---        | :---:         | :---                                     |
-| Canon Raw 2 | `.cr2`        | [dcraw](https://www.dechifro.org/dcraw/) |
-| Canon Raw 3 | `.cr3`        | [exiftool](https://exiftool.org/)        |
+| **Format**   | **Extension** | **Dependency**                           |
+| :---         | :---:         | :---                                     |
+| Canon Raw 2  | `.cr2`        | [dcraw](https://www.dechifro.org/dcraw/) |
+| Canon Raw 3  | `.cr3`        | [exiftool](https://exiftool.org/)        |
+| Fujifilm RAF | `.raf`        | [dcraw](https://www.dechifro.org/dcraw/) |
 
 ### Installation
 - Depending on the RAW file format, different dependencies are required. Please see the list above and install the required dependencies.

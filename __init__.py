@@ -10,6 +10,8 @@ from vimiv.utils import log
 
 _logger = log.module_logger(__name__)
 
+def test_raf(header: bytes, _f: BinaryIO) -> bool:
+    return header[:15] == b"FUJIFILMCCD-RAW"
 
 def test_cr2(header: bytes, _f: BinaryIO) -> bool:
     return header[:2] in (b"II", b"MM") and header[8:10] == b"CR"
@@ -123,6 +125,7 @@ def load_cr3(path) -> QPixmap:
 
 def init(info: str, *_args: Any, **_kwargs: Any) -> None:
     """Setup RawPrev plugin by adding the raw handler"""
+    api.add_external_format("raf", test_raf, load_cr2)
     api.add_external_format("cr2", test_cr2, load_cr2)
     api.add_external_format("cr3", test_cr3, load_cr3)
 

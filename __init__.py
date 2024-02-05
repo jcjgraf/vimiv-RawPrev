@@ -23,9 +23,18 @@ def test_orf(header: bytes, _f: BinaryIO) -> bool:
     return header[:4] == b"IIRO"
 
 
+def test_cr3(header: bytes, _f: BinaryIO) -> bool:
+    return (
+        header[4:8] == b"ftyp"
+        and header[8:11] == b"crx"
+        and header[16:24] == b"crx isom"
+        and header[28:32] == b"moov"
+    )
+
+
 @lru_cache(maxsize=40)
-def load_cr2(path) -> QPixmap:
-    """Extract the thumbnail from the image and initialize QPixmap"""
+def load_dcraw(path) -> QPixmap:
+    """Extract thumbnail using `dcraw` and initialize QPixmap."""
 
     process = QProcess()
     process.start("dcraw", ["-e", "-c", path])
@@ -55,18 +64,18 @@ def load_cr2(path) -> QPixmap:
     return pixmap
 
 
-def test_cr3(header: bytes, _f: BinaryIO) -> bool:
-    return (
-        header[4:8] == b"ftyp"
-        and header[8:11] == b"crx"
-        and header[16:24] == b"crx isom"
-        and header[28:32] == b"moov"
-    )
+def load_exiv2(path) -> QPixmap:
+    process = QProcess()
 
 
 @lru_cache(maxsize=40)
-def load_cr3(path) -> QPixmap:
-    """Extract the thumbnail from the image and initialize QPixmap"""
+def load_exiftool(path) -> QPixmap:
+    """Extract thumbnail using `exiftool` and initialize QPixmap."""
+
+    import datetime
+
+    # Fix race condition when load_exiftool is called on same path in parallel
+    timestamp = datetime.datetime.now().strftime("%S%f")
 
     process = QProcess()
     process.start(
@@ -75,13 +84,13 @@ def load_cr3(path) -> QPixmap:
             "-b",
             "-JpgFromRaw",
             "-w!",
-            "/tmp/vimiv-RawPrev%d%F.jpg",
+            f"/tmp/vimiv-RawPrev%d%F_{timestamp}.jpg",
             "-q",
             "-execute",
             "-tagsfromfile",
             "@",
             "-srcfile",
-            f"/tmp/vimiv-RawPrev{path}.jpg",
+            f"/tmp/vimiv-RawPrev{path}_{timestamp}.jpg",
             "-overwrite_original",
             "-common_args",
             path,
@@ -102,7 +111,7 @@ def load_cr3(path) -> QPixmap:
 
     # TODO reuse process
     process = QProcess()
-    process.start("cat", [f"/tmp/vimiv-RawPrev/{path}.jpg"])
+    process.start("cat", [f"/tmp/vimiv-RawPrev{path}_{timestamp}.jpg"])
 
     if not process.waitForFinished():
         _logger.error(f"Process exited with code {process.exitCode()}")
@@ -131,9 +140,9 @@ def load_cr3(path) -> QPixmap:
 
 def init(info: str, *_args: Any, **_kwargs: Any) -> None:
     """Setup RawPrev plugin by adding the raw handler"""
-    api.add_external_format("raf", test_raf, load_cr2)
-    api.add_external_format("cr2", test_cr2, load_cr2)
-    api.add_external_format("cr3", test_cr3, load_cr3)
-    api.add_external_format("orf", test_orf, load_cr2)
+    api.add_external_format("raf", test_raf, load_dcraw)
+    api.add_external_format("cr2", test_cr2, load_dcraw)
+    api.add_external_format("cr3", test_cr3, load_exiftool)
+    api.add_external_format("orf", test_orf, load_dcraw)
 
     _logger.debug("Initialized RawPrev")

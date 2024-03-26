@@ -87,6 +87,12 @@ def load_exiftool(path) -> QPixmap:
             f"/tmp/vimiv-RawPrev%d%F_{timestamp}.jpg",
             "-q",
             "-execute",
+            "-b",
+            "-previewimage",
+            "-w!",
+            f"/tmp/vimiv-RawPrev%d%F_{timestamp}.jpg",
+            "-q",
+            "-execute",
             "-tagsfromfile",
             "@",
             "-srcfile",
@@ -143,6 +149,6 @@ def init(info: str, *_args: Any, **_kwargs: Any) -> None:
     api.add_external_format("raf", test_raf, load_dcraw)
     api.add_external_format("cr2", test_cr2, load_dcraw)
     api.add_external_format("cr3", test_cr3, load_exiftool)
-    api.add_external_format("orf", test_orf, load_dcraw)
+    api.add_external_format("orf", test_orf, load_exiftool)
 
     _logger.debug("Initialized RawPrev")

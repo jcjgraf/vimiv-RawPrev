@@ -11,7 +11,7 @@ The following RAW formats are currently supported:
 | Canon Raw 2  | `.cr2`        | [dcraw](https://www.dechifro.org/dcraw/) |
 | Canon Raw 3  | `.cr3`        | [exiftool](https://exiftool.org/)        |
 | Fujifilm RAF | `.raf`        | [dcraw](https://www.dechifro.org/dcraw/) |
-| Olympus ORF  | `.orf`        | [dcraw](https://www.dechifro.org/dcraw/) |
+| Olympus ORF  | `.orf`        | [exiftool](https://exiftool.org/) |
 
 ### Installation
 - Depending on the RAW file format, different dependencies are required. Please see the list above and install the required dependencies.
